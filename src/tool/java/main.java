@@ -1,46 +1,80 @@
 package tool.java;
 
 import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-import java.util.*;
-
 import soot.jimple.toolkits.callgraph.CallGraph;
+import tool.analysis.infoflowResult;
 import tool.consistency.ConsistencyAnalysis;
 import tool.consistency.ConsistencyAnalysisResult;
-import tool.java.preprocess;
+import tool.mapping.apiMappingToPrivacy;
+import tool.mapping.apkMappingToEntity;
+import tool.mapping.ipMappingToDNS;
+import tool.mapping.urlMappingToEntity;
+import tool.modifyToTuple.modifyFlowResults;
+import tool.modifyToTuple.modifyPolicyResults;
 import tool.ontology.EntityOntologyMap;
 import tool.ontology.PrivacyOntologyMap;
-import tool.modifyToTuple.*;
-import tool.mapping.*;
-import tool.analysis.infoflowResult;
-import tool.other.*;
+import tool.other.enhance;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.*;
 
 public class main {
-    public static String apkPath = "D:\\ptpdroidapk\\MyLeviton.apk";
-    public static String jarsPath = "D:\\AndroidSDK\\platforms";
-    public static String androidCallbackPath = "D:\\PTPDroid-master\\configs\\FlowDroidConfigs\\AndroidCallBacks.txt";
-    public static String sourceAndSinkPath = "D:\\PTPDroid-master\\configs\\FlowDroidConfigs\\SourceAndSinks.txt";
-    public static String easyTaintWrapperSource = "D:\\PTPDroid-master\\configs\\FlowDroidConfigs\\EasyTaintWrapperSource.txt";
+    Properties properties = new Properties();
+
+    public static String apkPath;
+
+    public static String projectBaseDirPath;
+
+    public static String jarsPath;
+    public static String configPath; // = projectBaseDirPath + File.separator + "configs";
+    public static String flowDroidConfigs; // = configPath + File.separator + "FlowDroidConfigs";
+    public static String androidCallbackPath; // = flowDroidConfigs + File.separator + "AndroidCallBacks.txt";
+    public static String sourceAndSinkPath; // = flowDroidConfigs + File.separator + "SourceAndSinks.txt";
+    public static String easyTaintWrapperSource; // = flowDroidConfigs + File.separator + "EasyTaintWrapperSource.txt";
 
     //闅愮绛栫暐鐨勫垎鏋愮粨鏋�
-    public static String privacyPolicyResults = "D:\\PTPDroid-master\\configs\\policyResults.txt";
+    public static String privacyPolicyResults; // = configPath + File.separator + "policyResults.txt";
 
     //api鏂规硶鍜岄殣绉佷俊鎭殑鏄犲皠  apiMappingToPrivacy.txt
-    public static String apiTOPrivacy = "D:\\PTPDroid-master\\configs\\apiMappingToPrivacy.txt";
+    public static String apiTOPrivacy; // = configPath + File.separator + "apiMappingToPrivacy.txt";
     //闅愮淇℃伅鏈綋  privacyOntology.txt
-    public static String privacyTOOntology = "D:\\PTPDroid-master\\configs\\privacyOntology.txt";
+    public static String privacyTOOntology; // = configPath + File.separator + "privacyOntology.txt";
     //绗笁鏂瑰疄浣撶殑鏈綋 entityOntology.txt
-    public static String EntityOntology = "D:\\PTPDroid-master\\configs\\entityOntology.txt";
+    public static String EntityOntology; // = configPath + File.separator + "entityOntology.txt";
     //ip鍦板潃鍒皍rl鐨勬槧灏�  ipMappingToDNS.txt
-    public static String IPToDNS = "D:\\PTPDroid-master\\configs\\ipMappingToDNS.txt";
+    public static String IPToDNS;// = configPath + File.separator + "ipMappingToDNS.txt";
     //dns鍩熷悕鍒板疄浣撶殑鏄犲皠  DNSMappingToEntity.txt
-    public static String DNSToEntity = "D:\\PTPDroid-master\\configs\\DNSMappingToEntity.txt";
+    public static String DNSToEntity; // = configPath + File.separator + "DNSMappingToEntity.txt";
 
-    public static String firstParty ;
+    public static String firstParty;
     public static Set<String> missingThirdParty = new HashSet<>();
 
-    public static void main(String[] args) throws IOException, XmlPullParserException {
+    private static void localTest() throws XmlPullParserException, IOException {
+        apkPath = "C:\\Users\\Yalin Feng\\Code\\AndroidPrivacy\\Project\\data\\apk\\notepad.apk";
+        projectBaseDirPath = "C:\\Users\\Yalin Feng\\Code\\PTPDroid";
+        jarsPath = "C:\\Users\\Yalin Feng\\Code\\AndroidPrivacy\\Project\\libs\\platforms";
+        updatePaths(projectBaseDirPath);
+        run(new String[]{});
+    }
+
+    public static void updatePaths(String newProjectBaseDirPath) {
+        projectBaseDirPath = newProjectBaseDirPath;
+        configPath = projectBaseDirPath + File.separator + "configs";
+        flowDroidConfigs = configPath + File.separator + "FlowDroidConfigs";
+        androidCallbackPath = flowDroidConfigs + File.separator + "AndroidCallBacks.txt";
+        sourceAndSinkPath = flowDroidConfigs + File.separator + "SourceAndSinks.txt";
+        easyTaintWrapperSource = flowDroidConfigs + File.separator + "EasyTaintWrapperSource.txt";
+        privacyPolicyResults = configPath + File.separator + "policyResults.txt";
+        apiTOPrivacy = configPath + File.separator + "apiMappingToPrivacy.txt";
+        privacyTOOntology = configPath + File.separator + "privacyOntology.txt";
+        EntityOntology = configPath + File.separator + "entityOntology.txt";
+        IPToDNS = configPath + File.separator + "ipMappingToDNS.txt";
+        DNSToEntity = configPath + File.separator + "DNSMappingToEntity.txt";
+    }
+
+    public static void run(String[] args) throws IOException, XmlPullParserException {
         long start = System.currentTimeMillis();
         //鍒濆鍖杘ntology鍜宮apping
         EntityOntologyMap.initEntity(EntityOntology);
@@ -95,16 +129,18 @@ public class main {
 
         long end = System.currentTimeMillis();
         long time = end-start;
+        double timeInMinutes = time / 60000.0;
+        System.out.printf("Execution time: %.4f minutes%n", timeInMinutes);
 
         List<String[]> flowResults = modifyFlowResults.modifiedFlowResults(sinksToEntity,firstParty);
         List<String[]> appResults = enhance.modify(flowResults);
-            ConsistencyAnalysisResult result = ConsistencyAnalysis.consistencyAnalysis(appResults,policyResults);
-            result.outputInconsistentResults(result);
+        ConsistencyAnalysisResult result = ConsistencyAnalysis.consistencyAnalysis(appResults,policyResults);
+        result.outputInconsistentResults(result);
 
     }
 
 
-
-
+    public static void main(String[] args) throws IOException, XmlPullParserException, URISyntaxException {
+        localTest();
+    }
 }
-

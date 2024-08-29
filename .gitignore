@@ -4,3 +4,6 @@ soot-infoflow-summaries/target/
 /.recommenders
 .idea/
 *.iml
+./target/
+./bin/
+sootOutput/

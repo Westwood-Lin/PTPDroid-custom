@@ -10,6 +10,7 @@ import soot.jimple.infoflow.taintWrappers.EasyTaintWrapper;
 import soot.jimple.infoflow.taintWrappers.ITaintPropagationWrapper;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.options.Options;
+import tool.java.MyHandler;
 
 import java.io.IOException;
 import java.util.*;
@@ -79,6 +80,8 @@ public class infoflowResult {
         config.setLogSourcesAndSinks(true);
         config.setMergeDexFiles(true);
         //config.setImplicitFlowMode(ArrayAccesses);
+        setupApplication.addResultsAvailableHandler(new MyHandler()); //todo
+
         InfoflowResults infoflowResults = setupApplication.runInfoflow(configs[3]);
         System.out.println("FlowDroid运行结束！");
         return setupApplication.SignatureResults;
