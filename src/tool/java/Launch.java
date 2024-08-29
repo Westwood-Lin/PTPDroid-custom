@@ -20,12 +20,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
-public class main {
-    Properties properties = new Properties();
+public class Launch {
 
     public static String apkPath;
 
-    public static String projectBaseDirPath;
+//    public static String projectBaseDirPath;
 
     public static String jarsPath;
     public static String configPath; // = projectBaseDirPath + File.separator + "configs";
@@ -52,16 +51,18 @@ public class main {
     public static Set<String> missingThirdParty = new HashSet<>();
 
     private static void localTest() throws XmlPullParserException, IOException {
-        apkPath = "C:\\Users\\Yalin Feng\\Code\\AndroidPrivacy\\Project\\data\\apk\\notepad.apk";
-        projectBaseDirPath = "C:\\Users\\Yalin Feng\\Code\\PTPDroid";
-        jarsPath = "C:\\Users\\Yalin Feng\\Code\\AndroidPrivacy\\Project\\libs\\platforms";
-        updatePaths(projectBaseDirPath);
+//        apkPath = "C:\\Users\\Yalin Feng\\Code\\AndroidPrivacy\\Project\\data\\apk\\notepad.apk";
+//        configPath="C:\\Users\\Yalin Feng\\Code\\AndroidPrivacy\\Project\\configs";
+//        jarsPath = "C:\\Users\\Yalin Feng\\Code\\AndroidPrivacy\\Project\\libs\\platforms";
+        apkPath = "/home/fyl/project/code/AndroPrivacyConsistency/data/apk/RQ1/ap-news_5.17(10011).apk";
+        configPath = "/home/fyl/project/code/PTPDroid/configs";
+        jarsPath = "/home/fyl/project/code/AndroPrivacyConsistency/libs/platforms/";
+        updatePaths(configPath);
         run(new String[]{});
     }
 
-    public static void updatePaths(String newProjectBaseDirPath) {
-        projectBaseDirPath = newProjectBaseDirPath;
-        configPath = projectBaseDirPath + File.separator + "configs";
+    public static void updatePaths(String config) {
+        configPath = config;
         flowDroidConfigs = configPath + File.separator + "FlowDroidConfigs";
         androidCallbackPath = flowDroidConfigs + File.separator + "AndroidCallBacks.txt";
         sourceAndSinkPath = flowDroidConfigs + File.separator + "SourceAndSinks.txt";
@@ -84,10 +85,10 @@ public class main {
         apiMappingToPrivacy.initApi(apiTOPrivacy);
 
         //灏嗛殣绉佺瓥鐣ョ殑鍒嗘瀽缁撴灉杞寲鎴愯鑼冩牸寮�
-        List<String[]> policyResults =  modifyPolicyResults.modifiedPolicyResults(privacyPolicyResults);
+        List<String[]> policyResults = modifyPolicyResults.modifiedPolicyResults(privacyPolicyResults);
 
         //姹＄偣鍒嗘瀽鎵�闇�鐨勯厤缃�
-        String[] config = new String[]{apkPath,jarsPath,androidCallbackPath,sourceAndSinkPath,easyTaintWrapperSource};
+        String[] config = new String[]{apkPath, jarsPath, androidCallbackPath, sourceAndSinkPath, easyTaintWrapperSource};
 
         CallGraph callGraph = infoflowResult.getCallGraph(config);
         firstParty = apkMappingToEntity.changeToEntity(apkPath);
@@ -97,28 +98,28 @@ public class main {
         boolean flag = true;
         try {
             List<String[]> res = infoflowResult.taintAnalysis(config);
-            List<String[]> sinksToEntity1 = modifyFlowResults.findThirdPartyName(res,callGraph);
+            List<String[]> sinksToEntity1 = modifyFlowResults.findThirdPartyName(res, callGraph);
             sinksToEntity = sinksToEntity1;
-            modifyFlowResults.union(config,sinksToEntity1);
-            List<String[]> formedResults1 = modifyFlowResults.modifiedFlowResults(sinksToEntity1,firstParty);
+            modifyFlowResults.union(config, sinksToEntity1);
+            List<String[]> formedResults1 = modifyFlowResults.modifiedFlowResults(sinksToEntity1, firstParty);
             formedResults = formedResults1;
-        }catch (Exception e){
+        } catch (Exception e) {
             flag = false;
             List<String[]> res = tool.other.main.sootAnalysis(config);
         }
 
-        if(flag){
+        if (flag) {
             System.out.println("**************************");
             System.out.println("闈欐�佸垎鏋愮粨鏋滐細");
-            Map<String,Set<String>> results = modifyFlowResults.modifyResultStructure(formedResults);
+            Map<String, Set<String>> results = modifyFlowResults.modifyResultStructure(formedResults);
             Iterator<Map.Entry<String, Set<String>>> iterator = results.entrySet().iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 Map.Entry<String, Set<String>> entry = iterator.next();
-                System.out.print(entry.getKey()+" : ");
-                for(String data : entry.getValue()){
-                    if(data.contains("<")||data.contains("(")){
-                    }else {
-                        System.out.print(data+" , ");
+                System.out.print(entry.getKey() + " : ");
+                for (String data : entry.getValue()) {
+                    if (data.contains("<") || data.contains("(")) {
+                    } else {
+                        System.out.print(data + " , ");
                     }
                 }
                 System.out.println();
@@ -128,19 +129,42 @@ public class main {
 
 
         long end = System.currentTimeMillis();
-        long time = end-start;
+        long time = end - start;
         double timeInMinutes = time / 60000.0;
         System.out.printf("Execution time: %.4f minutes%n", timeInMinutes);
 
-        List<String[]> flowResults = modifyFlowResults.modifiedFlowResults(sinksToEntity,firstParty);
+        List<String[]> flowResults = modifyFlowResults.modifiedFlowResults(sinksToEntity, firstParty);
         List<String[]> appResults = enhance.modify(flowResults);
-        ConsistencyAnalysisResult result = ConsistencyAnalysis.consistencyAnalysis(appResults,policyResults);
+        ConsistencyAnalysisResult result = ConsistencyAnalysis.consistencyAnalysis(appResults, policyResults);
         result.outputInconsistentResults(result);
 
     }
 
 
     public static void main(String[] args) throws IOException, XmlPullParserException, URISyntaxException {
-        localTest();
+        try {
+            if (args != null && args.length > 0) {
+                System.out.println("args: " + Arrays.toString(args));
+
+                configPath = "/home/fyl/project/code/PTPDroid/configs";
+                jarsPath = "/home/fyl/project/code/AndroPrivacyConsistency/libs/platforms";
+                System.out.println("configPath: " + configPath);
+                System.out.println("jarsPath: " + jarsPath);
+
+                updatePaths(configPath);
+
+                File file = new File(args[0]);
+                if (file.exists()) {
+                    System.out.println("File exists: " + args[0]);
+                    System.out.println("[Start]");
+                    apkPath = args[0];
+                    run(new String[]{Arrays.toString(args)});
+                }
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            localTest();
+        }
     }
 }
