@@ -1,4 +1,4 @@
-package tool.java;
+package tool.launch;
 
 import soot.jimple.infoflow.handlers.ResultsAvailableHandler;
 import soot.jimple.infoflow.results.DataFlowResult;

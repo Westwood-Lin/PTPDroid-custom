@@ -91,7 +91,7 @@
 							</descriptorRefs>
 							<archive>
 								<manifest>
-									<mainClass>tool.java.Launch</mainClass>
+									<mainClass>tool.launch.Launch</mainClass>
 								</manifest>
 							</archive>
 						</configuration>

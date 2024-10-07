@@ -1,4 +1,4 @@
-package tool.java;
+package tool.launch;
 
 import org.xmlpull.v1.XmlPullParserException;
 import soot.jimple.toolkits.callgraph.CallGraph;

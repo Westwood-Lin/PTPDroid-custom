@@ -1,4 +1,4 @@
-package tool.java;
+package tool.launch;
 
 import org.xmlpull.v1.XmlPullParserException;
 import soot.jimple.toolkits.callgraph.CallGraph;
@@ -58,7 +58,7 @@ public class Launch {
         configPath = "/home/fyl/project/code/PTPDroid/configs";
         jarsPath = "/home/fyl/project/code/AndroPrivacyConsistency/libs/platforms/";
         updatePaths(configPath);
-        run(new String[]{});
+        run();
     }
 
     public static void updatePaths(String config) {
@@ -75,7 +75,7 @@ public class Launch {
         DNSToEntity = configPath + File.separator + "DNSMappingToEntity.txt";
     }
 
-    public static void run(String[] args) throws IOException, XmlPullParserException {
+    public static void run() throws IOException, XmlPullParserException {
         long start = System.currentTimeMillis();
         //鍒濆鍖杘ntology鍜宮apping
         EntityOntologyMap.initEntity(EntityOntology);
@@ -158,13 +158,13 @@ public class Launch {
                     System.out.println("File exists: " + args[0]);
                     System.out.println("[Start]");
                     apkPath = args[0];
-                    run(new String[]{Arrays.toString(args)});
+                    run();
                 }
             }
         }
         catch (Exception e){
             e.printStackTrace();
-            localTest();
         }
+//        localTest();
     }
 }

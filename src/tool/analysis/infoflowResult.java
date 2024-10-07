@@ -10,12 +10,10 @@ import soot.jimple.infoflow.taintWrappers.EasyTaintWrapper;
 import soot.jimple.infoflow.taintWrappers.ITaintPropagationWrapper;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.options.Options;
-import tool.java.MyHandler;
+import tool.launch.MyHandler;
 
 import java.io.IOException;
 import java.util.*;
-
-import static soot.SootClass.BODIES;
 
 public class infoflowResult {
     public static CallGraph getCallGraph(String[] configs){
